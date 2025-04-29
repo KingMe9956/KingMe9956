@@ -1,3 +1,16 @@
+https://github.com/KingMe9956/1st_code/blob/main/README.md
+
+https://github.com/KingMe9956/KingMe9956/blob/main/deploy.sh
+
+# In your local repo
+git checkout patch-1
+mv modnfts index.html
+git add .
+git commit -m "Fix filename"
+git push origin patch-1
+
 https://github.com/KingMe9956/moditory
+
 https://github.com/KingMe9956/moditory/tree/KingMe9956-patch-1
+
 https://github.com/KingMe9956/moditory/blob/KingMe9956-patch-1/modnfts
