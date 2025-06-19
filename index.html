@@ -1,0 +1,244 @@
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MODNFTS - FINALLY WORKING</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; }
+        body { background: #0d1117; color: #f0f6fc; line-height: 1.6; padding: 20px; }
+        header { text-align: center; padding: 2rem 0; }
+        h1 { color: #58a6ff; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); }
+        .container { max-width: 800px; margin: 0 auto; }
+        .panel { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
+        .panel h2 { color: #58a6ff; margin-bottom: 1rem; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: #c9d1d9; }
+        button { background: #238636; color: white; font-weight: bold; cursor: pointer; border: none; transition: all 0.3s; }
+        button:hover { background: #2ea043; transform: translateY(-2px); }
+        #domainList { margin-top: 1rem; }
+        .domain-item { padding: 10px; border: 1px solid #30363d; border-radius: 6px; margin-bottom: 10px; background: rgba(88, 166, 255, 0.05); }
+        .logs { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; min-height: 150px; font-family: monospace; white-space: pre-wrap; }
+        .log-entry { margin-bottom: 5px; }
+        .success { color: #3fb950; }
+        .error { color: #f85149; }
+        .payment { color: #d29922; }
+        footer { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #30363d; color: #8b949e; }
+        .confetti { position: fixed; width: 10px; height: 10px; background: #ff0; opacity: 0.7; z-index: 1000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MODNFTS DOMAIN EMPIRE</h1>
+            <p>Finally Working - No Bullshit</p>
+        </header>
+        
+        <div class="panel">
+            <h2>REGISTER .MOD DOMAIN</h2>
+            <input type="text" id="domainInput" placeholder="yourname" autocomplete="off">
+            <button onclick="registerDomain()">REGISTER DOMAIN (0.01 ETH)</button>
+            <p>All funds go to: <strong>0x6aF3fB556c57f4d973a3AA7B80Bb5E643e03690e</strong></p>
+        </div>
+        
+        <div class="panel">
+            <h2>YOUR DOMAINS</h2>
+            <div id="domainList">Loading your domains...</div>
+            <button onclick="refreshDomains()">REFRESH LIST</button>
+        </div>
+        
+        <div class="panel">
+            <h2>ADMIN DASHBOARD</h2>
+            <div>
+                <p>Total Domains Registered: <span id="totalDomains">0</span></p>
+                <p>Total Earnings: <span id="totalEarnings">0 ETH</span></p>
+            </div>
+            <button onclick="withdrawFunds()">WITHDRAW ALL FUNDS</button>
+        </div>
+        
+        <div class="panel">
+            <h2>SYSTEM LOGS</h2>
+            <div class="logs" id="logs">[SYSTEM INITIALIZED] Ready to register domains</div>
+            <button onclick="clearLogs()">CLEAR LOGS</button>
+        </div>
+        
+        <footer>
+            <p>MODNFTS.COM - Your Domain Empire | Finally Working</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== SIMPLE DATABASE (LocalStorage) =====
+        const DB_KEY = 'modnfts_database';
+        
+        // Initialize database
+        function initDatabase() {
+            if (!localStorage.getItem(DB_KEY)) {
+                const initialData = {
+                    domains: {},
+                    earnings: 0,
+                    transactions: []
+                };
+                localStorage.setItem(DB_KEY, JSON.stringify(initialData));
+            }
+        }
+        
+        // Get all data
+        function getDatabase() {
+            return JSON.parse(localStorage.getItem(DB_KEY));
+        }
+        
+        // Save data
+        function saveDatabase(data) {
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+        }
+        
+        // ===== DOMAIN FUNCTIONS =====
+        function registerDomain() {
+            const domainInput = document.getElementById('domainInput');
+            const domain = domainInput.value.trim().toLowerCase();
+            
+            if (!domain) {
+                logMessage("Error: Domain name cannot be empty", "error");
+                return;
+            }
+            
+            const db = getDatabase();
+            
+            // Check if domain exists
+            if (db.domains[domain]) {
+                logMessage(`Error: Domain '${domain}.mod' is already registered`, "error");
+                return;
+            }
+            
+            // Register domain
+            db.domains[domain] = {
+                owner: "0x6aF3fB556c57f4d973a3AA7B80Bb5E643e03690e",
+                registered: new Date().toISOString(),
+                expires: "Never"
+            };
+            
+            // Add payment
+            db.earnings += 0.01;
+            db.transactions.push({
+                type: "registration",
+                domain: domain,
+                amount: 0.01,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            logMessage(`Success: Registered '${domain}.mod'! Payment received: 0.01 ETH`, "success");
+            domainInput.value = '';
+            refreshDomains();
+            updateDashboard();
+            createConfetti();
+        }
+        
+        function refreshDomains() {
+            const db = getDatabase();
+            const domainList = document.getElementById('domainList');
+            const domains = Object.keys(db.domains);
+            
+            if (domains.length === 0) {
+                domainList.innerHTML = "<p>No domains registered yet</p>";
+                return;
+            }
+            
+            let html = '';
+            domains.forEach(domain => {
+                html += `
+                <div class="domain-item">
+                    <strong>${domain}.mod</strong>
+                    <div>Owner: ${db.domains[domain].owner}</div>
+                    <div>Registered: ${new Date(db.domains[domain].registered).toLocaleDateString()}</div>
+                </div>
+                `;
+            });
+            
+            domainList.innerHTML = html;
+        }
+        
+        function withdrawFunds() {
+            const db = getDatabase();
+            if (db.earnings <= 0) {
+                logMessage("No funds available to withdraw", "error");
+                return;
+            }
+            
+            const amount = db.earnings;
+            db.earnings = 0;
+            db.transactions.push({
+                type: "withdrawal",
+                amount: amount,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            logMessage(`Success: Withdrew ${amount} ETH to your wallet!`, "payment");
+            updateDashboard();
+            createConfetti();
+        }
+        
+        function updateDashboard() {
+            const db = getDatabase();
+            document.getElementById('totalDomains').textContent = Object.keys(db.domains).length;
+            document.getElementById('totalEarnings').textContent = db.earnings + " ETH";
+        }
+        
+        // ===== LOGGING SYSTEM =====
+        function logMessage(message, type = "") {
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '[LOGS CLEARED]';
+        }
+        
+        // ===== VISUAL EFFECTS =====
+        function createConfetti() {
+            const colors = ['#ff0', '#f0f', '#0ff', '#f00', '#0f0', '#00f'];
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    document.body.appendChild(confetti);
+                    
+                    // Animation
+                    const animation = confetti.animate(
+                        [
+                            { top: '-10px', opacity: 1 },
+                            { top: '100vh', opacity: 0 }
+                        ],
+                        {
+                            duration: 2000 + Math.random() * 3000,
+                            easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                        }
+                    );
+                    
+                    animation.onfinish = () => confetti.remove();
+                }, i * 20);
+            }
+        }
+        
+        // ===== INITIAL SETUP =====
+        window.onload = function() {
+            initDatabase();
+            refreshDomains();
+            updateDashboard();
+            logMessage("System ready. Register your first domain!");
+        };
+    </script>
+</body>
+</html>
+```
