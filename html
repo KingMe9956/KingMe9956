@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>modNFTs Autonomous Ecosystem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #181c24; color: #f5f6fa; margin: 0; }
+    header { background: #232946; padding: 2rem 1rem; text-align: center; }
+    h1 { margin: 0 0 0.5rem 0; font-size: 2.5rem; }
+    h2 { color: #eebbc3; }
+    main { max-width: 600px; margin: 2rem auto; background: #232946; border-radius: 12px; box-shadow: 0 2px 8px #0003; padding: 2rem; }
+    .vision { font-size: 1.2rem; margin-bottom: 2rem; }
+    form { display: flex; flex-direction: column; gap: 1rem; }
+    input, textarea { padding: 0.75rem; border-radius: 6px; border: none; font-size: 1rem; }
+    button { background: #eebbc3; color: #232946; border: none; padding: 0.75rem; border-radius: 6px; font-size: 1.1rem; cursor: pointer; }
+    button:hover { background: #ffd6e0; }
+    footer { text-align: center; color: #aaa; margin: 2rem 0 1rem 0; }
+    .note { color: #eebbc3; font-size: 0.95rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>modNFTs Autonomous Ecosystem</h1>
+    <h2>Register Your AI Models. Secure Your Innovations.</h2>
+  </header>
+  <main>
+    <div class="vision">
+      <p>
+        <strong>modNFTs</strong> is building a global, open registry for AI models and agents.<br>
+        <br>
+        <strong>Why?</strong> As AI grows, it’s vital to know <em>who</em> deployed <em>what</em>, <em>where</em>, and <em>why</em>. 
+        Our platform lets developers, researchers, and AI agents register their models, mint unique NFTs, and create a transparent, secure record for the world to see.<br>
+        <br>
+        <strong>For education, enterprise, and the future of AI.</strong>
+      </p>
+    </div>
+    <form id="register-form">
+      <h3>Register Your Model</h3>
+      <input type="text" name="name" placeholder="Model or Agent Name" required>
+      <input type="text" name="owner" placeholder="Your Name or Organization" required>
+      <textarea name="description" placeholder="Describe your model, workflow, or purpose..." rows="4" required></textarea>
+      <input type="url" name="repo" placeholder="Link to code or documentation (optional)">
+      <button type="submit">Register Model</button>
+      <div class="note">Your registration will be visible to the world. NFT minting and advanced features coming soon!</div>
+    </form>
+    <div id="result"></div>
+  </main>
+  <footer>
+    &copy; 2025 modNFTs.com &mdash; <a href="https://github.com/KingMe9956/modnfts-autonomous-ecosystem" style="color:#eebbc3;">Open Source on GitHub</a>
+  </footer>
+  <script>
+    // Simple form handler (for demo, sends to backend API if available)
+    document.getElementById('register-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = "Registering...";
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          resultDiv.textContent = "Model registered! Thank you for contributing to the future of AI.";
+          this.reset();
+        } else {
+          resultDiv.textContent = "Registration failed. Please try again later.";
+        }
+      } catch (err) {
+        resultDiv.textContent = "Could not connect to backend. If you are running locally, start your server!";
+      }
+    };
+  </script>
+</body>
+</html>
